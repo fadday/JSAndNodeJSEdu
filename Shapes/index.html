@@ -33,9 +33,15 @@
             function click(){
                 canvasService.addRandomShape();
             }
+            
+            function deleteShape(){
+                canvasService.deleteSelectedShape();
+            }
+            
         </script>
         <div>
             <input type="button" onclick="window.click();" value="ClickMe" />
+            <input type="button" onclick="window.deleteShape();" value="Delete" />
         </div>
     </body>
 </html>

@@ -240,6 +240,8 @@ function CanvasService(canvasName){
     this.shapes = new Array();
     
     this.selectedShapeId = -1;
+    this.lastSelectedShapeId = -1;
+    
     this.nextShapeId = 0;
 }
 
@@ -265,6 +267,7 @@ CanvasService.prototype.reciveHit = function(clientX, clientY){
         if (this.shapes[i].hit(hitPoint)){
             this.shapes[i].clickPoint = hitPoint;
             this.selectedShapeId = this.shapes[i].id;
+            this.lastSelectedShapeId = this.shapes[i].id;
         }
     }
 }
@@ -279,7 +282,7 @@ CanvasService.prototype.moveShape = function(clientX, clientY){
         if (this.shapes[i].id == this.selectedShapeId){
             this.shapes[i].moveTo(movePoint);
             
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.clearContext();
             
             this.drawShapes();
         }
@@ -316,3 +319,28 @@ CanvasService.prototype.addRandomShape = function(){
     
     this.nextShapeId++;
 }
+
+CanvasService.prototype.clearContext = function(){
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+}
+
+CanvasService.prototype.deleteSelectedShape = function(){
+    for (var i = 0; i < this.shapes.length; i++){
+        if (this.shapes[i].id == this.lastSelectedShapeId){
+            this.shapes.remove(i);
+            
+            this.clearContext();
+            this.drawShapes();
+        }
+    }
+}
+
+//*********************************************************************
+
+// Array Remove - By John Resig (MIT Licensed)
+
+Array.prototype.remove = function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+};
