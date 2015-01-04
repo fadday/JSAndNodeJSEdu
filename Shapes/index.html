@@ -15,11 +15,7 @@
             window.addEventListener('mousedown', mouseDownListener, false);
             window.addEventListener('mousemove', mouseMoveListener, false);
             window.addEventListener('mouseup', mouseUpListener, false);
-            
-            canvasService.shapes.push(new Triangle(0));
-            canvasService.shapes.push(new Rectangle(1));
-            canvasService.shapes.push(new Circle(2));
-            
+
             canvasService.drawShapes();
             
             function mouseDownListener(event){
@@ -34,9 +30,12 @@
                 canvasService.clearSelection();
             }
             
+            function click(){
+                canvasService.addRandomShape();
+            }
         </script>
         <div>
-            <input type="button" onclick="click()" value="ClickMe" />
+            <input type="button" onclick="window.click();" value="ClickMe" />
         </div>
     </body>
 </html>

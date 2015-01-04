@@ -240,6 +240,7 @@ function CanvasService(canvasName){
     this.shapes = new Array();
     
     this.selectedShapeId = -1;
+    this.nextShapeId = 0;
 }
 
 /* forEach anonymous function в области видимости Window, this.context == undefined
@@ -287,4 +288,31 @@ CanvasService.prototype.moveShape = function(clientX, clientY){
 
 CanvasService.prototype.clearSelection = function(){
     this.selectedShapeId = -1;
+}
+
+CanvasService.prototype.addRandomShape = function(){
+    var type = Math.floor(Math.random() * (3 - 0) + 0);
+    
+    switch (type)
+    {
+            case 0:{
+                this.shapes.push(new Triangle(this.nextShapeId));
+                break;
+            }
+            case 1:{
+                this.shapes.push(new Rectangle(this.nextShapeId));
+                break;
+            }
+            case 2:{
+                this.shapes.push(new Circle(this.nextShapeId));
+                break;
+            }
+            default:{
+                console.log('Wrong variant: ' + type);
+            }
+    }
+    
+    this.drawShapes();
+    
+    this.nextShapeId++;
 }
