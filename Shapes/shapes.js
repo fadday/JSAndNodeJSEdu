@@ -90,10 +90,14 @@ Triangle.prototype.moveTo = function(point){
 }
 //*******************************************************
 
-function Rectangle(){
+function Rectangle(id){
+    
+    this.id = id;
+    
     this.coord = new Array(2);
     
     this.setCoord(new Point(100, 100), new Point(200, 200));
+    
 }
 
 Rectangle.prototype = new Shape();
@@ -120,6 +124,20 @@ Rectangle.prototype.hit = function(point){
     
     return ((point.x >= a.x && point.x <= b.x) && (point.y >= a.y && point.y <= b.y))
 }
+
+Rectangle.prototype.moveTo = function(point){
+    
+    var a = this.coord[0];
+    var b = this.coord[1];
+    
+    var center = new Point(b.x / 2, a.y / 2);
+    var sub = new Point(center.x - point.x, center.y - point.y);
+    
+    this.coord[0] = new Point(a.x - sub.x, a.y - sub.y);
+    this.coord[1] = new Point(b.x - sub.x, b.y - sub.y);
+    
+}
+
 //*********************************************************
 
 function Circle(id){
