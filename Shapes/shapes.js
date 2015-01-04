@@ -143,6 +143,12 @@ Circle.prototype.draw = function(context){
     context.fill();
 }
 
+Circle.prototype.hit = function(point){
+    var center = this.coord[0];
+    var radius = Math.abs(center.x - this.coord[1].x);
+    
+    return (Math.pow((point.x - center.x), 2) + Math.pow((point.y - center.y), 2) <= Math.pow(radius, 2));
+}
 //*******************************************************
 
 function CanvasService(canvasName){
