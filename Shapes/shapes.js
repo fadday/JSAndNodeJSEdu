@@ -34,6 +34,10 @@ Shape.prototype.draw = function(){
     return undefined;
 }
 
+Shape.prototype.hit = function(point){
+    return undefined;
+}
+
 //*****************************************************
 
 function Triangle(){
@@ -63,6 +67,19 @@ Triangle.prototype.draw = function(context){
     context.lineTo(this.coord[2].x, this.coord[2].y);
     
     context.fill();
+}
+
+Triangle.prototype.hit = function(point){
+    
+    var a = this.coord[0];
+    var b = this.coord[1];
+    var c = this.coord[2];
+    
+    var testA = (a.x - point.x) * (b.y - a.y) - (b.x - a.x) * (a.y - point.y);
+    var testB = (b.x - point.x) * (c.y - b.y) - (c.x - b.x) * (b.y - point.y);
+    var testC = (c.x - point.x) * (a.y - c.y) - (a.x - c.x) * (c.y - point.y);
+    
+    return ((testA >= 0 && testB >= 0 && testC >= 0) || (testA <= 0 && testB <= 0 && testC <= 0))
 }
 
 //*******************************************************
