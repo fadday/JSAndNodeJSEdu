@@ -9,17 +9,13 @@
             <canvas width="500px" height="300px" id="mycanvas"></canvas>
         </div>
         <script type="text/javascript">
-                var canvas = document.getElementById('mycanvas');
-                var context = canvas.getContext('2d');
-                
-                var triangle = new Triangle();
-                triangle.draw(context);
             
-                var rectangle = new Rectangle();
-                rectangle.draw(context);
+            var canvasService = new CanvasService('mycanvas');
+            canvasService.shapes.push(new Triangle());
+            canvasService.shapes.push(new Rectangle());
             
-                var circle = new Circle();
-                circle.draw(context);
+            canvasService.drawShapes();
+            
         </script>
         <div>
             <input type="button" onclick="click()" value="ClickMe" />

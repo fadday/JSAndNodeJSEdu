@@ -119,3 +119,26 @@ Circle.prototype.draw = function(context){
     
     context.fill();
 }
+
+//*******************************************************
+
+function CanvasService(canvasName){
+    this.canvas = document.getElementById(canvasName);
+    this.context = this.canvas.getContext('2d');
+    
+    this.shapes = new Array();
+}
+
+/* forEach anonymous function в области видимости Window, this.context == undefined
+CanvasService.prototype.drawShapes = function(){
+    this.shapes.forEach(function(shape, index, array){
+        shape.draw(this.context);
+    })
+}
+*/
+
+CanvasService.prototype.drawShapes = function(){
+    for(var i = 0; i < this.shapes.length; i++){
+        this.shapes[i].draw(this.context);
+    }
+}
