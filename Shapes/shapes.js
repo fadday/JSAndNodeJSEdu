@@ -38,6 +38,9 @@ Shape.prototype.hit = function(point){
     return undefined;
 }
 
+Shape.prototype.moveTo = function(point){
+    return undefined;
+}
 //*****************************************************
 
 function Triangle(){
@@ -82,6 +85,9 @@ Triangle.prototype.hit = function(point){
     return ((testA >= 0 && testB >= 0 && testC >= 0) || (testA <= 0 && testB <= 0 && testC <= 0))
 }
 
+Triangle.prototype.moveTo = function(point){
+    
+}
 //*******************************************************
 
 function Rectangle(){
@@ -116,7 +122,10 @@ Rectangle.prototype.hit = function(point){
 }
 //*********************************************************
 
-function Circle(){
+function Circle(id){
+    
+    this.id = id;
+    
     this.coord = new Array(2);
     
     this.setCoord(new Point(100, 100), new Point(150, 100));
@@ -138,7 +147,12 @@ Circle.prototype.draw = function(context){
     var b = this.coord[1];
     
     var radius = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
+    
+    context.beginPath();
+    
     context.arc(a.x, a.y, radius, 0, 2*Math.PI, false);
+    
+    context.closePath();
     
     context.fill();
 }
@@ -149,13 +163,42 @@ Circle.prototype.hit = function(point){
     
     return (Math.pow((point.x - center.x), 2) + Math.pow((point.y - center.y), 2) <= Math.pow(radius, 2));
 }
+
+Circle.prototype.moveTo = function(point){
+    var center = this.coord[0];
+    var radius = Math.abs(this.coord[1].x - center.x);
+    
+    var sub = new Point(center.x - point.x, center.y - point.y);
+    var newCenter = new Point(point.x - sub.x, point.y - sub.y);
+    
+    var newLinePoint = new Point(newCenter.x + radius, newCenter.y);
+    
+    this.coord[0] = newCenter;
+    this.coord[1] = newLinePoint;
+    
+    console.log(newCenter.x + ':' + newCenter.y + ':' + radius);
+    console.log(point.x + ':' + point.y);
+}
 //*******************************************************
 
+function fromClientPointToInside(canvas, clientX, clientY){
+        
+    var clientRectangle = canvas.getBoundingClientRect();
+    
+    var mouseX = (clientX - clientRectangle.left) * (canvas.width / clientRectangle.width);
+    var mouseY = (clientY - clientRectangle.top) * (canvas.height / clientRectangle.height);
+        
+    return new Point(mouseX, mouseY);
+}
+
+//*******************************************************
 function CanvasService(canvasName){
     this.canvas = document.getElementById(canvasName);
     this.context = this.canvas.getContext('2d');
     
     this.shapes = new Array();
+    
+    this.selectedShapeId = -1;
 }
 
 /* forEach anonymous function в области видимости Window, this.context == undefined
@@ -173,16 +216,37 @@ CanvasService.prototype.drawShapes = function(){
 }
 
 CanvasService.prototype.reciveHit = function(clientX, clientY){
-    var clientRectangle = this.canvas.getBoundingClientRect();
-    
-    var mouseX = (clientX - clientRectangle.left) * (this.canvas.width / clientRectangle.width);
-    var mouseY = (clientY - clientRectangle.top) * (this.canvas.height / clientRectangle.height);
-    
-    var hitPoint = new Point(mouseX, mouseY);
+
+    var hitPoint = fromClientPointToInside(this.canvas, clientX, clientY);
     
     for (var i = 0; i < this.shapes.length; i++){
         if (this.shapes[i].hit(hitPoint)){
-            console.log(this.shapes[i].id);
+            this.selectedShapeId = this.shapes[i].id;
         }
     }
+}
+
+CanvasService.prototype.moveShape = function(clientX, clientY){
+    if (this.selectedShapeId == -1)
+        return;
+    
+    var movePoint = fromClientPointToInside(this.canvas, clientX, clientY);
+    
+    for (var i = 0; i < this.shapes.length; i++){
+        if (this.shapes[i].id == this.selectedShapeId){
+            this.shapes[i].moveTo(movePoint);
+            
+            this.context.fillStyle = "#ffffff";
+
+            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.context.restore();
+            this.context.fillStyle = "#000000";
+            
+            this.drawShapes();
+        }
+    }
+}
+
+CanvasService.prototype.clearSelection = function(){
+    this.selectedShapeId = -1;
 }
