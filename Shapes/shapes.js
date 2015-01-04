@@ -34,6 +34,10 @@ Shape.prototype.draw = function(){
     return undefined;
 }
 
+Shape.prototype.hit = function(point){
+    return undefined;
+}
+
 //*****************************************************
 
 function Triangle(){
@@ -65,6 +69,19 @@ Triangle.prototype.draw = function(context){
     context.fill();
 }
 
+Triangle.prototype.hit = function(point){
+    
+    var a = this.coord[0];
+    var b = this.coord[1];
+    var c = this.coord[2];
+    
+    var testA = (a.x - point.x) * (b.y - a.y) - (b.x - a.x) * (a.y - point.y);
+    var testB = (b.x - point.x) * (c.y - b.y) - (c.x - b.x) * (b.y - point.y);
+    var testC = (c.x - point.x) * (a.y - c.y) - (a.x - c.x) * (c.y - point.y);
+    
+    return ((testA >= 0 && testB >= 0 && testC >= 0) || (testA <= 0 && testB <= 0 && testC <= 0))
+}
+
 //*******************************************************
 
 function Rectangle(){
@@ -91,6 +108,12 @@ Rectangle.prototype.draw = function(context){
     context.fillRect(this.coord[0].x, this.coord[0].y, width, height);
 }
 
+Rectangle.prototype.hit = function(point){
+    var a = this.coord[0];
+    var b = this.coord[1];
+    
+    return ((point.x >= a.x && point.x <= b.x) && (point.y >= a.y && point.y <= b.y))
+}
 //*********************************************************
 
 function Circle(){
@@ -120,6 +143,12 @@ Circle.prototype.draw = function(context){
     context.fill();
 }
 
+Circle.prototype.hit = function(point){
+    var center = this.coord[0];
+    var radius = Math.abs(center.x - this.coord[1].x);
+    
+    return (Math.pow((point.x - center.x), 2) + Math.pow((point.y - center.y), 2) <= Math.pow(radius, 2));
+}
 //*******************************************************
 
 function CanvasService(canvasName){
@@ -140,5 +169,20 @@ CanvasService.prototype.drawShapes = function(){
 CanvasService.prototype.drawShapes = function(){
     for(var i = 0; i < this.shapes.length; i++){
         this.shapes[i].draw(this.context);
+    }
+}
+
+CanvasService.prototype.reciveHit = function(clientX, clientY){
+    var clientRectangle = this.canvas.getBoundingClientRect();
+    
+    var mouseX = (clientX - clientRectangle.left) * (this.canvas.width / clientRectangle.width);
+    var mouseY = (clientY - clientRectangle.top) * (this.canvas.height / clientRectangle.height);
+    
+    var hitPoint = new Point(mouseX, mouseY);
+    
+    for (var i = 0; i < this.shapes.length; i++){
+        if (this.shapes[i].hit(hitPoint)){
+            console.log(this.shapes[i].id);
+        }
     }
 }

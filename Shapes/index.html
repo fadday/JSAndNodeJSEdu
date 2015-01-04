@@ -11,10 +11,18 @@
         <script type="text/javascript">
             
             var canvasService = new CanvasService('mycanvas');
+            
+            window.addEventListener('mousedown', mouseDownListener, false);
+            
             canvasService.shapes.push(new Triangle());
             canvasService.shapes.push(new Rectangle());
+            canvasService.shapes.push(new Circle());
             
             canvasService.drawShapes();
+            
+            function mouseDownListener(event){
+                canvasService.reciveHit(event.clientX, event.clientY);
+            }
             
         </script>
         <div>
