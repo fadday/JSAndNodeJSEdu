@@ -108,6 +108,12 @@ Rectangle.prototype.draw = function(context){
     context.fillRect(this.coord[0].x, this.coord[0].y, width, height);
 }
 
+Rectangle.prototype.hit = function(point){
+    var a = this.coord[0];
+    var b = this.coord[1];
+    
+    return ((point.x >= a.x && point.x <= b.x) && (point.y >= a.y && point.y <= b.y))
+}
 //*********************************************************
 
 function Circle(){
@@ -157,5 +163,20 @@ CanvasService.prototype.drawShapes = function(){
 CanvasService.prototype.drawShapes = function(){
     for(var i = 0; i < this.shapes.length; i++){
         this.shapes[i].draw(this.context);
+    }
+}
+
+CanvasService.prototype.reciveHit = function(clientX, clientY){
+    var clientRectangle = this.canvas.getBoundingClientRect();
+    
+    var mouseX = (clientX - clientRectangle.left) * (this.canvas.width / clientRectangle.width);
+    var mouseY = (clientY - clientRectangle.top) * (this.canvas.height / clientRectangle.height);
+    
+    var hitPoint = new Point(mouseX, mouseY);
+    
+    for (var i = 0; i < this.shapes.length; i++){
+        if (this.shapes[i].hit(hitPoint)){
+            console.log(this.shapes[i].id);
+        }
     }
 }
