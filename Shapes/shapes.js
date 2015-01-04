@@ -236,11 +236,7 @@ CanvasService.prototype.moveShape = function(clientX, clientY){
         if (this.shapes[i].id == this.selectedShapeId){
             this.shapes[i].moveTo(movePoint);
             
-            this.context.fillStyle = "#ffffff";
-
-            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            this.context.restore();
-            this.context.fillStyle = "#000000";
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
             
             this.drawShapes();
         }
