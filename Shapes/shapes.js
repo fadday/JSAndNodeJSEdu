@@ -8,6 +8,7 @@ function Point(x, y)
 
 function Shape(){
     this.id = 0;
+    this.clickPoint = new Point(-1, -1);
 };
 
 Shape.prototype.getType = function(){ 
@@ -43,10 +44,14 @@ Shape.prototype.moveTo = function(point){
 }
 //*****************************************************
 
-function Triangle(){
+function Triangle(id){
+    
+    this.id = id;
+    
     this.coord = new Array(3);
     
     this.setCoord(new Point(0,0), new Point(0,100), new Point(100,0));
+    
 }
 
 Triangle.prototype = new Shape();
@@ -86,7 +91,25 @@ Triangle.prototype.hit = function(point){
 }
 
 Triangle.prototype.moveTo = function(point){
+    var a = this.coord[0];
+    var b = this.coord[1];
+    var c = this.coord[2];
     
+    a.x += point.x - this.clickPoint.x;
+    a.y += point.y - this.clickPoint.y;
+    
+    b.x += point.x - this.clickPoint.x;
+    b.y += point.y - this.clickPoint.y;
+    
+    c.x += point.x - this.clickPoint.x;
+    c.y += point.y - this.clickPoint.y;
+    
+    this.clickPoint.x += point.x - this.clickPoint.x;
+    this.clickPoint.y += point.y - this.clickPoint.y;
+    
+    this.coord[0] = a;
+    this.coord[1] = b;
+    this.coord[2] = c;
 }
 //*******************************************************
 
@@ -239,6 +262,7 @@ CanvasService.prototype.reciveHit = function(clientX, clientY){
     
     for (var i = 0; i < this.shapes.length; i++){
         if (this.shapes[i].hit(hitPoint)){
+            this.shapes[i].clickPoint = hitPoint;
             this.selectedShapeId = this.shapes[i].id;
         }
     }
