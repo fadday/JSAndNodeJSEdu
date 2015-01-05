@@ -7,12 +7,11 @@ function Point(x, y)
 //******************************************************
 
 function Shape(){
-    this.id = 0;
     this.clickPoint = new Point(-1, -1);
 };
 
 Shape.prototype.getType = function(){ 
-    return 'shape'; 
+    return 'shape';
 };
 
 Shape.prototype.getCoord = function(){
@@ -75,6 +74,10 @@ Triangle.prototype.draw = function(context){
     context.lineTo(this.coord[2].x, this.coord[2].y);
     
     context.fill();
+}
+
+Triangle.prototype.getType = function(){
+    return 'Triangle';
 }
 
 Triangle.prototype.hit = function(point){
@@ -141,6 +144,10 @@ Rectangle.prototype.draw = function(context){
     context.fillRect(this.coord[0].x, this.coord[0].y, width, height);
 }
 
+Rectangle.prototype.getType = function(){
+    return 'Rectangle';
+}
+
 Rectangle.prototype.hit = function(point){
     var a = this.coord[0];
     var b = this.coord[1];
@@ -153,11 +160,17 @@ Rectangle.prototype.moveTo = function(point){
     var a = this.coord[0];
     var b = this.coord[1];
     
-    var center = new Point(b.x / 2, a.y / 2);
-    var sub = new Point(center.x - point.x, center.y - point.y);
+    a.x += point.x - this.clickPoint.x;
+    a.y += point.y - this.clickPoint.y;
     
-    this.coord[0] = new Point(a.x - sub.x, a.y - sub.y);
-    this.coord[1] = new Point(b.x - sub.x, b.y - sub.y);
+    b.x += point.x - this.clickPoint.x;
+    b.y += point.y - this.clickPoint.y;
+    
+    this.clickPoint.x += point.x - this.clickPoint.x;
+    this.clickPoint.y += point.y - this.clickPoint.y;
+    
+    this.coord[0] = a;
+    this.coord[1] = b;
     
 }
 
@@ -198,6 +211,10 @@ Circle.prototype.draw = function(context){
     context.fill();
 }
 
+Circle.prototype.getType = function(){
+    return 'Circle';
+}
+
 Circle.prototype.hit = function(point){
     var center = this.coord[0];
     var radius = Math.abs(center.x - this.coord[1].x);
@@ -209,16 +226,16 @@ Circle.prototype.moveTo = function(point){
     var center = this.coord[0];
     var radius = Math.abs(this.coord[1].x - center.x);
     
-    var sub = new Point(center.x - point.x, center.y - point.y);
-    var newCenter = new Point(point.x - sub.x, point.y - sub.y);
+    center.x += point.x - this.clickPoint.x;
+    center.y += point.y - this.clickPoint.y;
     
-    var newLinePoint = new Point(newCenter.x + radius, newCenter.y);
+    this.clickPoint.x += point.x - this.clickPoint.x;
+    this.clickPoint.y += point.y - this.clickPoint.y;
     
-    this.coord[0] = newCenter;
+    var newLinePoint = new Point(center.x + radius, center.y);
+    
+    this.coord[0] = center;
     this.coord[1] = newLinePoint;
-    
-    console.log(newCenter.x + ':' + newCenter.y + ':' + radius);
-    console.log(point.x + ':' + point.y);
 }
 //*******************************************************
 
