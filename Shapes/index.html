@@ -38,10 +38,26 @@
                 canvasService.deleteSelectedShape();
             }
             
+            
+            function sendToServer(){
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'http://localhost:8888/ajax', true);
+                
+                xhr.onreadystatechange = function(){
+                    if (this.readyState != 4){
+                        return;
+                    }
+                    
+                    alert(this.resoponseText);
+                }
+                
+                xhr.send('');
+            }
         </script>
         <div>
             <input type="button" onclick="window.click();" value="ClickMe" />
             <input type="button" onclick="window.deleteShape();" value="Delete" />
+            <input type="button" onclick="window.sendToServer();" value="Send" />
         </div>
     </body>
 </html>
