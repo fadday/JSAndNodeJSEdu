@@ -8,18 +8,25 @@ function Point(x, y)
 
 function Shape(){
     this.clickPoint = new Point(-1, -1);
+    this.type = this.constructor.name;
+    this.userId = undefined;
 };
 
 Shape.prototype.getType = function(){ 
     return 'shape';
 };
 
+Shape.prototype.initFields = function(coord, userId, clickPoint){
+    this.coord = coord;
+    this.userId = userId;
+}
+
 Shape.prototype.getCoord = function(){
     return undefined;
 }
 
-Shape.prototype.setCoord = function(param){
-    return undefined;
+Shape.prototype.setCoord = function(coord){
+    this.coord = coord;
 }
 
 Shape.prototype.getId = function(){
@@ -46,7 +53,7 @@ Shape.prototype.moveTo = function(point){
 function Triangle(id){
     
     this.id = id;
-    
+    this.type = 'Triangle';
     this.coord = new Array(3);
     
     this.setCoord(new Point(0,0), new Point(0,100), new Point(100,0));
@@ -119,7 +126,7 @@ Triangle.prototype.moveTo = function(point){
 function Rectangle(id){
     
     this.id = id;
-    
+    this.type = 'Rectangle';
     this.coord = new Array(2);
     
     this.setCoord(new Point(100, 100), new Point(200, 200));
@@ -179,7 +186,7 @@ Rectangle.prototype.moveTo = function(point){
 function Circle(id){
     
     this.id = id;
-    
+    this.type = 'Circle';
     this.coord = new Array(2);
     
     this.setCoord(new Point(100, 100), new Point(150, 100));
@@ -250,16 +257,32 @@ function fromClientPointToInside(canvas, clientX, clientY){
 }
 
 //*******************************************************
-function CanvasService(canvasName){
+function CanvasService(canvasName, shapeService){
+    var self = this;
+    
     this.canvas = document.getElementById(canvasName);
     this.context = this.canvas.getContext('2d');
     
-    this.shapes = new Array();
+    this.shapeService = shapeService;
+    
+    shapeService.loadFromServer(function(shapesArray){
+        self.shapes = shapesArray;
+    });
+    
+    if (this.shapes == undefined) {
+        this.shapes = new Array();
+        this.nextShapeId = 0;
+    }
+    else {
+        if (this.shapes.length > 0)
+            this.nextShapeId = this.shapes[this.shapes.length - 1].id + 1;
+        else{
+            this.nextShapeId = 0;
+        }
+    }
     
     this.selectedShapeId = -1;
     this.lastSelectedShapeId = -1;
-    
-    this.nextShapeId = 0;
 }
 
 /* forEach anonymous function в области видимости Window, this.context == undefined
@@ -270,10 +293,19 @@ CanvasService.prototype.drawShapes = function(){
 }
 */
 
-CanvasService.prototype.drawShapes = function(){
+CanvasService.prototype.drawShapes = function(refreshServerState){
     for(var i = 0; i < this.shapes.length; i++){
         this.shapes[i].draw(this.context);
     }
+    
+    if (refreshServerState) 
+        this.shapeService.sendOnServer(this.shapes);
+    /*
+    var self = this;
+    
+    window.setInterval( function() {
+        self.shapeService.sendOnServer(self.shapes);
+    },1);*/
 }
 
 CanvasService.prototype.reciveHit = function(clientX, clientY){
@@ -283,8 +315,14 @@ CanvasService.prototype.reciveHit = function(clientX, clientY){
     for (var i = 0; i < this.shapes.length; i++){
         if (this.shapes[i].hit(hitPoint)){
             this.shapes[i].clickPoint = hitPoint;
-            this.selectedShapeId = this.shapes[i].id;
-            this.lastSelectedShapeId = this.shapes[i].id;
+            
+            if (this.shapes[i].userId == document.cookie){
+                this.selectedShapeId = this.shapes[i].id;
+                this.lastSelectedShapeId = this.shapes[i].id;
+            }
+            else{
+                console.log('This is not your shape!');
+            }
         }
     }
 }
@@ -301,7 +339,7 @@ CanvasService.prototype.moveShape = function(clientX, clientY){
             
             this.clearContext();
             
-            this.drawShapes();
+            this.drawShapes(true);
         }
     }
 }
@@ -312,27 +350,32 @@ CanvasService.prototype.clearSelection = function(){
 
 CanvasService.prototype.addRandomShape = function(){
     var type = Math.floor(Math.random() * (3 - 0) + 0);
+    var tempShape = undefined;
     
     switch (type)
     {
             case 0:{
-                this.shapes.push(new Triangle(this.nextShapeId));
+                tempShape = new Triangle(this.nextShapeId);
                 break;
             }
             case 1:{
-                this.shapes.push(new Rectangle(this.nextShapeId));
+                tempShape = new Rectangle(this.nextShapeId);
                 break;
             }
             case 2:{
-                this.shapes.push(new Circle(this.nextShapeId));
+                tempShape = new Circle(this.nextShapeId);
                 break;
             }
             default:{
                 console.log('Wrong variant: ' + type);
             }
     }
+   
+    tempShape.userId = document.cookie;
+
+    this.shapes.push(tempShape);
     
-    this.drawShapes();
+    this.drawShapes(true);
     
     this.nextShapeId++;
 }
@@ -347,9 +390,82 @@ CanvasService.prototype.deleteSelectedShape = function(){
             this.shapes.remove(i);
             
             this.clearContext();
-            this.drawShapes();
+            
+            this.drawShapes(true);
         }
     }
+}
+
+//*********************************************************************
+
+function ShapeService(){
+    this.xhr = new XMLHttpRequest();    
+}
+
+ShapeService.prototype.openConnection = function(requestMethod, isAsync){
+    this.xhr.open(requestMethod, 'http://localhost:8888/ajax', isAsync);
+    this.xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+}
+
+ShapeService.prototype.sendOnServer = function(shapeArray){
+    this.openConnection('POST', true);
+    this.xhr.send(JSON.stringify(shapeArray));
+}
+
+ShapeService.prototype.loadFromServer = function(afterRecive){
+    this.openConnection('GET', false);
+    
+    var recivedJSON = '';
+    
+    this.xhr.onreadystatechange = function(){
+        if (this.readyState != 4) 
+            return 1;
+        
+        var shapes = new Array();
+        
+        if (this.responseText == '') 
+            return shapes;
+        
+        shapes = JSONToShapeArray(this.responseText);
+        
+        afterRecive(shapes);
+    }
+    
+    this.xhr.send('');
+}
+
+/** @param {String} jsonString */
+function JSONToShapeArray(jsonString) {
+    var tempArray = JSON.parse(jsonString);
+    var shapes = new Array();
+    
+    for (var i = 0; i < tempArray.length; i++){
+        var temp;
+
+        switch (tempArray[i].type){
+            case 'Triangle':{
+                temp = new Triangle(tempArray[i].id);
+                break;
+            }
+            case 'Rectangle':{
+                temp = new Rectangle(tempArray[i].id);
+                break;
+            }
+            case 'Circle':{
+                temp = new Circle(tempArray[i].id);
+                break;
+            }
+            default:{
+                console.log('Wrong type!!!');
+            }
+        }
+
+        temp.initFields(tempArray[i].coord, tempArray[i].userId, tempArray[i].clickPoint);
+
+        shapes.push(temp);
+    }
+    
+    return shapes;
 }
 
 //*********************************************************************
@@ -361,3 +477,8 @@ Array.prototype.remove = function(from, to) {
     this.length = from < 0 ? this.length + from : from;
     return this.push.apply(this, rest);
 };
+
+/*
+var classname=window[classname_str]; //вариант-2
+var obj=new classname(); 
+*/
