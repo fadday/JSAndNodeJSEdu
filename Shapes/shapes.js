@@ -12,38 +12,22 @@ function Shape(){
     this.userId = undefined;
 }
 
-Shape.prototype.getType = function(){ 
-    return 'shape';
-}
-
-Shape.prototype.initFields = function(coord, userId, clickPoint){
+Shape.prototype.initFields = function(coord, userId){
     this.coord = coord;
     this.userId = userId;
-}
-
-Shape.prototype.getCoord = function(){
-    return undefined;
-}
+};
 
 Shape.prototype.setCoord = function(coord){
     this.coord = coord;
-}
-
-Shape.prototype.getId = function(){
-    return this.id;
-}
-
-Shape.prototype.setId = function(id){
-    this.id = id;
-}
+};
 
 Shape.prototype.draw = function(){
     return undefined;
-}
+};
 
-Shape.prototype.hit = function(point){
+Shape.prototype.hit = function(){
     return undefined;
-}
+};
 
 Shape.prototype.moveTo = function(point, clickPoint){
     for (var i = 0; i < this.coord.length; i++) {
@@ -71,11 +55,7 @@ Triangle.prototype.setCoord = function (a, b, c) {
     this.coord[0] = a;
     this.coord[1] = b;
     this.coord[2] = c;
-}
-
-Triangle.prototype.getCoord = function(){
-    return this.coord;
-}
+};
 
 Triangle.prototype.draw = function(context){
     
@@ -86,11 +66,7 @@ Triangle.prototype.draw = function(context){
     context.lineTo(this.coord[2].x, this.coord[2].y);
     
     context.fill();
-}
-
-Triangle.prototype.getType = function(){
-    return 'Triangle';
-}
+};
 
 Triangle.prototype.hit = function(point){
     
@@ -103,7 +79,7 @@ Triangle.prototype.hit = function(point){
     var testC = (c.x - point.x) * (a.y - c.y) - (a.x - c.x) * (c.y - point.y);
     
     return ((testA >= 0 && testB >= 0 && testC >= 0) || (testA <= 0 && testB <= 0 && testC <= 0))
-}
+};
 
 //*******************************************************
 
@@ -119,32 +95,24 @@ function Rectangle(id){
 
 Rectangle.prototype = new Shape();
 
-Rectangle.prototype.getCoord = function(){
-    return this.coord;
-}
-
 Rectangle.prototype.setCoord = function(a, b){
     this.coord[0] = a;
     this.coord[1] = b;
-}
+};
 
 Rectangle.prototype.draw = function(context){
     var width = Math.abs(this.coord[1].x - this.coord[0].x);
     var height = Math.abs(this.coord[1].y - this.coord[0].y);
     
     context.fillRect(this.coord[0].x, this.coord[0].y, width, height);
-}
-
-Rectangle.prototype.getType = function(){
-    return 'Rectangle';
-}
+};
 
 Rectangle.prototype.hit = function(point){
     var a = this.coord[0];
     var b = this.coord[1];
     
     return ((point.x >= a.x && point.x <= b.x) && (point.y >= a.y && point.y <= b.y))
-}
+};
 
 //*********************************************************
 
@@ -159,14 +127,10 @@ function Circle(id){
 
 Circle.prototype = new Shape();
 
-Circle.prototype.getCoord = function(){
-    return this.coord;
-}
-
 Circle.prototype.setCoord = function(a, b){
     this.coord[0] = a;
     this.coord[1] = b;
-}
+};
 
 Circle.prototype.draw = function(context){
     var a = this.coord[0];
@@ -181,18 +145,14 @@ Circle.prototype.draw = function(context){
     context.closePath();
     
     context.fill();
-}
-
-Circle.prototype.getType = function(){
-    return 'Circle';
-}
+};
 
 Circle.prototype.hit = function(point){
     var center = this.coord[0];
     var radius = Math.abs(center.x - this.coord[1].x);
     
     return (Math.pow((point.x - center.x), 2) + Math.pow((point.y - center.y), 2) <= Math.pow(radius, 2));
-}
+};
 
 //*******************************************************
 
@@ -248,15 +208,10 @@ CanvasService.prototype.drawShapes = function(refreshServerState){
         this.shapes[i].draw(this.context);
     }
     
-    if (refreshServerState) 
+    if (refreshServerState) {
         this.shapeService.sendOnServer(this.shapes);
-    /*
-    var self = this;
-    
-    window.setInterval( function() {
-        self.shapeService.sendOnServer(self.shapes);
-    },1);*/
-}
+    }
+};
 
 CanvasService.prototype.reciveHit = function(clientX, clientY){
 
@@ -275,7 +230,7 @@ CanvasService.prototype.reciveHit = function(clientX, clientY){
             }
         }
     }
-}
+};
 
 CanvasService.prototype.moveShape = function(clientX, clientY){
     if (this.selectedShapeId == -1)
@@ -292,15 +247,15 @@ CanvasService.prototype.moveShape = function(clientX, clientY){
             this.drawShapes(true);
         }
     }
-}
+};
 
 CanvasService.prototype.clearSelection = function(){
     this.selectedShapeId = -1;
-}
+};
 
 CanvasService.prototype.addRandomShape = function(){
-    var type = Math.floor(Math.random() * (3 - 0) + 0);
-    var tempShape = undefined;
+    var type = Math.floor(Math.random() * 3);
+    var tempShape;
     
     switch (type)
     {
@@ -328,11 +283,11 @@ CanvasService.prototype.addRandomShape = function(){
     this.drawShapes(true);
     
     this.nextShapeId++;
-}
+};
 
 CanvasService.prototype.clearContext = function(){
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-}
+};
 
 CanvasService.prototype.deleteSelectedShape = function(){
     for (var i = 0; i < this.shapes.length; i++){
@@ -344,7 +299,7 @@ CanvasService.prototype.deleteSelectedShape = function(){
             this.drawShapes(true);
         }
     }
-}
+};
 
 //*********************************************************************
 
@@ -355,18 +310,16 @@ function ShapeService(){
 ShapeService.prototype.openConnection = function(requestMethod, isAsync){
     this.xhr.open(requestMethod, '/ajax', isAsync);
     this.xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-}
+};
 
 ShapeService.prototype.sendOnServer = function(shapeArray){
     this.openConnection('POST', true);
     this.xhr.send(JSON.stringify(shapeArray));
-}
+};
 
 ShapeService.prototype.loadFromServer = function(afterRecive){
     this.openConnection('GET', false);
-    
-    var recivedJSON = '';
-    
+
     this.xhr.onreadystatechange = function(){
         if (this.readyState != 4) 
             return 1;
@@ -379,10 +332,10 @@ ShapeService.prototype.loadFromServer = function(afterRecive){
         shapes = JSONToShapeArray(this.responseText);
         
         afterRecive(shapes);
-    }
+    };
     
     this.xhr.send('');
-}
+};
 
 /** @param {String} jsonString */
 function JSONToShapeArray(jsonString) {
