@@ -180,7 +180,7 @@ function CanvasService(canvasName, shapeService){
     });
     
     if (this.shapes == undefined) {
-        this.shapes = new Array();
+        this.shapes = [];
         this.nextShapeId = 0;
     }
     else {
@@ -324,7 +324,7 @@ ShapeService.prototype.loadFromServer = function(afterRecive){
         if (this.readyState != 4) 
             return 1;
         
-        var shapes = new Array();
+        var shapes = [];
         
         if (this.responseText == '') 
             return shapes;
@@ -340,7 +340,7 @@ ShapeService.prototype.loadFromServer = function(afterRecive){
 /** @param {String} jsonString */
 function JSONToShapeArray(jsonString) {
     var tempArray = JSON.parse(jsonString);
-    var shapes = new Array();
+    var shapes = [];
     
     for (var i = 0; i < tempArray.length; i++){
         var temp;

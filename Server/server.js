@@ -16,7 +16,7 @@ app.get('/ajax', function(request, response){
     response.send(shapeArrayJSON);
     
     console.log(request.query);
-})
+});
 
 app.post('/ajax', function(request, response){
     
@@ -41,7 +41,7 @@ app.get('/shapes.js', function(request, response){
 });
 
 io.on('connection', function(socket){
-    console.log('User connected: ' + io.sockets.sockets.length);
+    console.log('Users connected: ' + io.sockets.sockets.length);
 });
 
 http.listen(8888);
