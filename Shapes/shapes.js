@@ -10,11 +10,11 @@ function Shape(){
     this.clickPoint = new Point(-1, -1);
     this.type = this.constructor.name;
     this.userId = undefined;
-};
+}
 
 Shape.prototype.getType = function(){ 
     return 'shape';
-};
+}
 
 Shape.prototype.initFields = function(coord, userId, clickPoint){
     this.coord = coord;
@@ -100,22 +100,22 @@ Triangle.prototype.hit = function(point){
     return ((testA >= 0 && testB >= 0 && testC >= 0) || (testA <= 0 && testB <= 0 && testC <= 0))
 }
 
-Triangle.prototype.moveTo = function(point){
+Triangle.prototype.moveTo = function(point, clickPoint){
     var a = this.coord[0];
     var b = this.coord[1];
     var c = this.coord[2];
     
-    a.x += point.x - this.clickPoint.x;
-    a.y += point.y - this.clickPoint.y;
+    a.x += point.x - clickPoint.x;
+    a.y += point.y - clickPoint.y;
     
-    b.x += point.x - this.clickPoint.x;
-    b.y += point.y - this.clickPoint.y;
+    b.x += point.x - clickPoint.x;
+    b.y += point.y - clickPoint.y;
     
-    c.x += point.x - this.clickPoint.x;
-    c.y += point.y - this.clickPoint.y;
+    c.x += point.x - clickPoint.x;
+    c.y += point.y - clickPoint.y;
     
-    this.clickPoint.x += point.x - this.clickPoint.x;
-    this.clickPoint.y += point.y - this.clickPoint.y;
+    clickPoint.x = point.x;
+    clickPoint.y = point.y;
     
     this.coord[0] = a;
     this.coord[1] = b;
@@ -162,19 +162,19 @@ Rectangle.prototype.hit = function(point){
     return ((point.x >= a.x && point.x <= b.x) && (point.y >= a.y && point.y <= b.y))
 }
 
-Rectangle.prototype.moveTo = function(point){
+Rectangle.prototype.moveTo = function(point, clickPoint){
     
     var a = this.coord[0];
     var b = this.coord[1];
     
-    a.x += point.x - this.clickPoint.x;
-    a.y += point.y - this.clickPoint.y;
+    a.x += point.x - clickPoint.x;
+    a.y += point.y - clickPoint.y;
     
-    b.x += point.x - this.clickPoint.x;
-    b.y += point.y - this.clickPoint.y;
+    b.x += point.x - clickPoint.x;
+    b.y += point.y - clickPoint.y;
     
-    this.clickPoint.x += point.x - this.clickPoint.x;
-    this.clickPoint.y += point.y - this.clickPoint.y;
+    clickPoint.x = point.x;
+    clickPoint.y = point.y;
     
     this.coord[0] = a;
     this.coord[1] = b;
@@ -229,15 +229,15 @@ Circle.prototype.hit = function(point){
     return (Math.pow((point.x - center.x), 2) + Math.pow((point.y - center.y), 2) <= Math.pow(radius, 2));
 }
 
-Circle.prototype.moveTo = function(point){
+Circle.prototype.moveTo = function(point, clickPoint){
     var center = this.coord[0];
     var radius = Math.abs(this.coord[1].x - center.x);
     
-    center.x += point.x - this.clickPoint.x;
-    center.y += point.y - this.clickPoint.y;
+    center.x += point.x - clickPoint.x;
+    center.y += point.y - clickPoint.y;
     
-    this.clickPoint.x += point.x - this.clickPoint.x;
-    this.clickPoint.y += point.y - this.clickPoint.y;
+    clickPoint.x = point.x;
+    clickPoint.y = point.y;
     
     var newLinePoint = new Point(center.x + radius, center.y);
     
@@ -314,7 +314,7 @@ CanvasService.prototype.reciveHit = function(clientX, clientY){
     
     for (var i = 0; i < this.shapes.length; i++){
         if (this.shapes[i].hit(hitPoint)){
-            this.shapes[i].clickPoint = hitPoint;
+            this.clickPoint = hitPoint;
             
             if (this.shapes[i].userId == document.cookie){
                 this.selectedShapeId = this.shapes[i].id;
@@ -335,7 +335,7 @@ CanvasService.prototype.moveShape = function(clientX, clientY){
     
     for (var i = 0; i < this.shapes.length; i++){
         if (this.shapes[i].id == this.selectedShapeId){
-            this.shapes[i].moveTo(movePoint);
+            this.shapes[i].moveTo(movePoint, this.clickPoint);
             
             this.clearContext();
             
@@ -403,7 +403,7 @@ function ShapeService(){
 }
 
 ShapeService.prototype.openConnection = function(requestMethod, isAsync){
-    this.xhr.open(requestMethod, 'http://localhost:8888/ajax', isAsync);
+    this.xhr.open(requestMethod, '/ajax', isAsync);
     this.xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 }
 
@@ -459,7 +459,7 @@ function JSONToShapeArray(jsonString) {
                 console.log('Wrong type!!!');
             }
         }
-
+        // нужна функция которая перебирает распарсенный массив и приравнивает взе значения свойств
         temp.initFields(tempArray[i].coord, tempArray[i].userId, tempArray[i].clickPoint);
 
         shapes.push(temp);

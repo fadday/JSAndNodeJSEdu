@@ -22,8 +22,29 @@
             var canvasService = new CanvasService('mycanvas', shapeService);
             var socket = io();
             
+            var prevMsgFromServer = '';
+            
             socket.on('canvasChange', function(msg){
-                canvasService.shapes = JSONToShapeArray(msg);
+                
+                if (msg == JSON.stringify(canvasService.shapes))
+                    return;
+                
+                var ourShapesArray = new Array();
+                var incomingShapesArray = JSONToShapeArray(msg);
+                
+                for (var i = 0; i < canvasService.shapes.length; i++){
+                    if (canvasService.shapes[i].userId == document.cookie)
+                        ourShapesArray.push(canvasService.shapes[i]);
+                }
+                
+                for (var i = 0; i < incomingShapesArray.length; i++){
+                    if(incomingShapesArray[i].userId != document.cookie){
+                        ourShapesArray.push(incomingShapesArray[i]);
+                    }
+                }
+                
+                //canvasService.shapes = JSONToShapeArray(msg);
+                canvasService.shapes = ourShapesArray;
                 canvasService.clearContext();
                 canvasService.drawShapes(false);
             });
