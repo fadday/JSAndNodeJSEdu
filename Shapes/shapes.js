@@ -45,9 +45,15 @@ Shape.prototype.hit = function(point){
     return undefined;
 }
 
-Shape.prototype.moveTo = function(point){
-    return undefined;
-}
+Shape.prototype.moveTo = function(point, clickPoint){
+    for (var i = 0; i < this.coord.length; i++) {
+        this.coord[i].x += point.x - clickPoint.x;
+        this.coord[i].y += point.y - clickPoint.y;
+    }
+
+    clickPoint.x = point.x;
+    clickPoint.y = point.y;
+};
 //*****************************************************
 
 function Triangle(id){
@@ -57,7 +63,6 @@ function Triangle(id){
     this.coord = new Array(3);
     
     this.setCoord(new Point(0,0), new Point(0,100), new Point(100,0));
-    
 }
 
 Triangle.prototype = new Shape();
@@ -100,27 +105,6 @@ Triangle.prototype.hit = function(point){
     return ((testA >= 0 && testB >= 0 && testC >= 0) || (testA <= 0 && testB <= 0 && testC <= 0))
 }
 
-Triangle.prototype.moveTo = function(point, clickPoint){
-    var a = this.coord[0];
-    var b = this.coord[1];
-    var c = this.coord[2];
-    
-    a.x += point.x - clickPoint.x;
-    a.y += point.y - clickPoint.y;
-    
-    b.x += point.x - clickPoint.x;
-    b.y += point.y - clickPoint.y;
-    
-    c.x += point.x - clickPoint.x;
-    c.y += point.y - clickPoint.y;
-    
-    clickPoint.x = point.x;
-    clickPoint.y = point.y;
-    
-    this.coord[0] = a;
-    this.coord[1] = b;
-    this.coord[2] = c;
-}
 //*******************************************************
 
 function Rectangle(id){
@@ -160,25 +144,6 @@ Rectangle.prototype.hit = function(point){
     var b = this.coord[1];
     
     return ((point.x >= a.x && point.x <= b.x) && (point.y >= a.y && point.y <= b.y))
-}
-
-Rectangle.prototype.moveTo = function(point, clickPoint){
-    
-    var a = this.coord[0];
-    var b = this.coord[1];
-    
-    a.x += point.x - clickPoint.x;
-    a.y += point.y - clickPoint.y;
-    
-    b.x += point.x - clickPoint.x;
-    b.y += point.y - clickPoint.y;
-    
-    clickPoint.x = point.x;
-    clickPoint.y = point.y;
-    
-    this.coord[0] = a;
-    this.coord[1] = b;
-    
 }
 
 //*********************************************************
@@ -229,21 +194,6 @@ Circle.prototype.hit = function(point){
     return (Math.pow((point.x - center.x), 2) + Math.pow((point.y - center.y), 2) <= Math.pow(radius, 2));
 }
 
-Circle.prototype.moveTo = function(point, clickPoint){
-    var center = this.coord[0];
-    var radius = Math.abs(this.coord[1].x - center.x);
-    
-    center.x += point.x - clickPoint.x;
-    center.y += point.y - clickPoint.y;
-    
-    clickPoint.x = point.x;
-    clickPoint.y = point.y;
-    
-    var newLinePoint = new Point(center.x + radius, center.y);
-    
-    this.coord[0] = center;
-    this.coord[1] = newLinePoint;
-}
 //*******************************************************
 
 function fromClientPointToInside(canvas, clientX, clientY){
