@@ -196,11 +196,14 @@ function CanvasService(canvasName, shapeService){
 }
 
 /* forEach anonymous function в области видимости Window, this.context == undefined
+
 CanvasService.prototype.drawShapes = function(){
     this.shapes.forEach(function(shape, index, array){
         shape.draw(this.context);
     })
 }
+
+Решается с помощью замыканий, почитать кокретней и изменить...
 */
 
 CanvasService.prototype.drawShapes = function(refreshServerState){
@@ -277,12 +280,10 @@ CanvasService.prototype.addRandomShape = function(){
     }
    
     tempShape.userId = document.cookie;
-
+    console.log('Add shape: ' + tempShape.type + ' ' + tempShape.id);
     this.shapes.push(tempShape);
     
     this.drawShapes(true);
-    
-    this.nextShapeId++;
 };
 
 CanvasService.prototype.clearContext = function(){
@@ -314,7 +315,16 @@ ShapeService.prototype.openConnection = function(requestMethod, isAsync){
 
 ShapeService.prototype.sendOnServer = function(shapeArray){
     this.openConnection('POST', true);
-    this.xhr.send(JSON.stringify(shapeArray));
+
+    var thisClientShapes = [];
+
+    shapeArray.forEach(function(shape, index, array){
+       if (shape.userId == document.cookie){
+           thisClientShapes.push(shape);
+       }
+    });
+
+    this.xhr.send(JSON.stringify(thisClientShapes));
 };
 
 ShapeService.prototype.loadFromServer = function(afterRecive){
@@ -345,6 +355,14 @@ function JSONToShapeArray(jsonString) {
     for (var i = 0; i < tempArray.length; i++){
         var temp;
 
+        /* Вот на это надо заменить...
+
+         var classname=window[classname_str];
+         var obj=new classname();
+
+         ...код который ниже..
+         */
+
         switch (tempArray[i].type){
             case 'Triangle':{
                 temp = new Triangle(tempArray[i].id);
@@ -372,7 +390,7 @@ function JSONToShapeArray(jsonString) {
 }
 
 //*********************************************************************
-
+// Используется при удалении фигуры
 // Array Remove - By John Resig (MIT Licensed)
 
 Array.prototype.remove = function(from, to) {
@@ -380,8 +398,3 @@ Array.prototype.remove = function(from, to) {
     this.length = from < 0 ? this.length + from : from;
     return this.push.apply(this, rest);
 };
-
-/*
-var classname=window[classname_str]; //вариант-2
-var obj=new classname(); 
-*/

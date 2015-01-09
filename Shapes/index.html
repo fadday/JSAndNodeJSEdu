@@ -48,7 +48,7 @@
                 canvasService.clearContext();
                 canvasService.drawShapes(false);
             });
-            
+
             window.addEventListener('mousedown', mouseDownListener, false);
             window.addEventListener('mousemove', mouseMoveListener, false);
             window.addEventListener('mouseup', mouseUpListener, false);
@@ -72,9 +72,20 @@
             //*** SHAPE POPULATION CONTROL ***
             
             function addShape(){
-                canvasService.addRandomShape();
+
+                prevShapeId = canvasService.nextShapeId;
+
+                socket.emit('getNextShapeId', '');
             }
-            
+
+            socket.on('getNextShapeId', function(msg){
+                canvasService.nextShapeId = msg;
+
+                canvasService.addRandomShape();
+
+                console.log(msg);
+            });
+
             function deleteShape(){
                 canvasService.deleteSelectedShape();
             }
