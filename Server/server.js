@@ -73,7 +73,7 @@ app.post('/ajax', function(request, response){
             console.log("end");
         }
 
-        io.emit('canvasChange', JSON.stringify(allClientShapes));
+        sendShapesToClients(allClientShapes);
     });
     
     response.send('OK');
@@ -91,6 +91,37 @@ io.on('connection', function(socket){
         socket.emit('getNextShapeId', nextShapeId);
         nextShapeId++;
     });
+
+    socket.on('deleteShape', function(shapeId){
+
+        var deletingShapeIndex = -1;
+
+        for(var i = 0; i < allClientShapes.length; i++){
+            if (allClientShapes[i].id == shapeId){
+                deletingShapeIndex = i;
+            }
+        }
+
+        if (deletingShapeIndex != -1) {
+            allClientShapes.remove(deletingShapeIndex);
+        }
+
+        sendShapesToClients(allClientShapes);
+    });
 });
 
+function sendShapesToClients(shapesArray){
+    io.emit('canvasChange', JSON.stringify(shapesArray));
+}
+
 http.listen(8888);
+
+//*********************************************************************
+// Используется при удалении фигуры
+// Array Remove - By John Resig (MIT Licensed)
+
+Array.prototype.remove = function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+};

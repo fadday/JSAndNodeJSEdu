@@ -88,6 +88,8 @@
 
             function deleteShape(){
                 canvasService.deleteSelectedShape();
+
+                socket.emit('deleteShape', canvasService.lastSelectedShapeId);
             }
             
             //*** COMMUNICATION WITH SERVER ***
