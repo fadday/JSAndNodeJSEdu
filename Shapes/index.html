@@ -2,128 +2,133 @@
     <head>
         <title>Shape test page</title>
 
-        <link href="/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" />
 
-        <script src="/js/bootstrap.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 
         <script src="shapes.js" type="text/javascript"></script>
         <script src="/socket.io/socket.io.js" type="text/javascript"></script>
     </head>
     <body>
-        <div>
-            <canvas width="500px" height="300px" id="mycanvas"></canvas>
-        </div>
-        <script type="text/javascript">
-            
-            //*** USER INIT ***
-            
-            if (document.cookie == ''){
-                document.cookie = Math.random();
-            }
-            
-            //*** INIT ***
-            
-            var shapeService = new ShapeService();
-            var canvasService = new CanvasService('mycanvas', shapeService);
-            var socket = io();
-            
-            var prevMsgFromServer = '';
+        <div class="container">
+            <div class="header">
+                <h3 class="text-muted">UShape</h3>
+            </div>
+            <div class="jumbotron" style="text-align: center;">
+                <canvas style="border: 1px solid gray;" width="500px" height="300px" id="mycanvas"></canvas>
+            </div>
 
-            socket.on('initCanvas', function(msg){
-                canvasService.shapes = JSONToShapeArray(msg);
+            <script type="text/javascript">
 
-                canvasService.clearContext();
-                canvasService.drawShapes(false);
-            });
+                //*** USER INIT ***
 
-            socket.on('canvasChange', function(msg){
-                
-                if (msg == JSON.stringify(canvasService.shapes))
-                    return;
-                
-                var ourShapesArray = new Array();
-                var incomingShapesArray = JSONToShapeArray(msg);
-                
-                for (var i = 0; i < canvasService.shapes.length; i++){
-                    if (canvasService.shapes[i].userId == document.cookie)
-                        ourShapesArray.push(canvasService.shapes[i]);
+                if (document.cookie == ''){
+                    document.cookie = Math.random();
                 }
-                
-                for (var i = 0; i < incomingShapesArray.length; i++){
-                    if(incomingShapesArray[i].userId != document.cookie){
-                        ourShapesArray.push(incomingShapesArray[i]);
-                    }
-                }
-                
-                //canvasService.shapes = JSONToShapeArray(msg);
-                canvasService.shapes = ourShapesArray;
-                canvasService.clearContext();
-                canvasService.drawShapes(false);
-            });
 
-            window.addEventListener('mousedown', mouseDownListener, false);
-            window.addEventListener('mousemove', mouseMoveListener, false);
-            window.addEventListener('mouseup', mouseUpListener, false);
+                //*** INIT ***
 
-            canvasService.drawShapes();
-            
-            //*** EVENT LISTENERS ***
+                var shapeService = new ShapeService();
+                var canvasService = new CanvasService('mycanvas', shapeService);
+                var socket = io();
 
-            function mouseDownListener(event){
-                canvasService.reciveHit(event.clientX, event.clientY);
-            }
-            
-            function mouseMoveListener(event){
-                canvasService.moveShape(event.clientX, event.clientY);
-            }
-            
-            function mouseUpListener(event){
-                canvasService.clearSelection();
-            }
-            
-            //*** SHAPE POPULATION CONTROL ***
-            
-            function addShape(){
+                var prevMsgFromServer = '';
 
-                prevShapeId = canvasService.nextShapeId;
+                socket.on('initCanvas', function(msg){
+                    canvasService.shapes = JSONToShapeArray(msg);
 
-                socket.emit('getNextShapeId', '');
-            }
-
-            socket.on('getNextShapeId', function(msg){
-                canvasService.nextShapeId = msg;
-
-                canvasService.addRandomShape();
-
-                console.log(msg);
-            });
-
-            function deleteShape(){
-                canvasService.deleteSelectedShape();
-
-                socket.emit('deleteShape', canvasService.lastSelectedShapeId);
-            }
-            
-            //*** COMMUNICATION WITH SERVER ***
-            
-            function sendToServer(){
-                shapeService.sendOnServer(canvasService.shapes);
-            }
-            
-            function loadFromServer(){
-                shapeService.loadFromServer(function(shapeArray){
-                    canvasService.shapes = shapeArray;
+                    canvasService.clearContext();
                     canvasService.drawShapes(false);
-                    
-                    canvasService.nextShapeId = shapeArray[shapeArray.length - 1].id + 1;
                 });
-            }
-        </script>
-        <div>
-            <input type="button" onclick="window.addShape();" value="ClickMe" />
-            <input type="button" onclick="window.deleteShape();" value="Delete" />
-            <input type="button" onclick="window.sendToServer();" value="Send" />
-            <input type="button" onclick="window.loadFromServer();" value="Load" />
+
+                socket.on('canvasChange', function(msg){
+
+                    if (msg == JSON.stringify(canvasService.shapes))
+                        return;
+
+                    var ourShapesArray = new Array();
+                    var incomingShapesArray = JSONToShapeArray(msg);
+
+                    for (var i = 0; i < canvasService.shapes.length; i++){
+                        if (canvasService.shapes[i].userId == document.cookie)
+                            ourShapesArray.push(canvasService.shapes[i]);
+                    }
+
+                    for (var i = 0; i < incomingShapesArray.length; i++){
+                        if(incomingShapesArray[i].userId != document.cookie){
+                            ourShapesArray.push(incomingShapesArray[i]);
+                        }
+                    }
+
+                    //canvasService.shapes = JSONToShapeArray(msg);
+                    canvasService.shapes = ourShapesArray;
+                    canvasService.clearContext();
+                    canvasService.drawShapes(false);
+                });
+
+                window.addEventListener('mousedown', mouseDownListener, false);
+                window.addEventListener('mousemove', mouseMoveListener, false);
+                window.addEventListener('mouseup', mouseUpListener, false);
+
+                canvasService.drawShapes();
+
+                //*** EVENT LISTENERS ***
+
+                function mouseDownListener(event){
+                    canvasService.reciveHit(event.clientX, event.clientY);
+                }
+
+                function mouseMoveListener(event){
+                    canvasService.moveShape(event.clientX, event.clientY);
+                }
+
+                function mouseUpListener(event){
+                    canvasService.clearSelection();
+                }
+
+                //*** SHAPE POPULATION CONTROL ***
+
+                function addShape(){
+
+                    prevShapeId = canvasService.nextShapeId;
+
+                    socket.emit('getNextShapeId', '');
+                }
+
+                socket.on('getNextShapeId', function(msg){
+                    canvasService.nextShapeId = msg;
+
+                    canvasService.addRandomShape();
+
+                    console.log(msg);
+                });
+
+                function deleteShape(){
+                    canvasService.deleteSelectedShape();
+
+                    socket.emit('deleteShape', canvasService.lastSelectedShapeId);
+                }
+
+                //*** COMMUNICATION WITH SERVER ***
+
+                function sendToServer(){
+                    shapeService.sendOnServer(canvasService.shapes);
+                }
+
+                function loadFromServer(){
+                    shapeService.loadFromServer(function(shapeArray){
+                        canvasService.shapes = shapeArray;
+                        canvasService.drawShapes(false);
+
+                        canvasService.nextShapeId = shapeArray[shapeArray.length - 1].id + 1;
+                    });
+                }
+            </script>
+
+            <div>
+                <input class="btn btn-lg btn-success" type="button" onclick="window.addShape();" value="Add Shape" />
+                <input class="btn btn-lg btn-danger" type="button" onclick="window.deleteShape();" value="Delete" />
+            </div>
         </div>
     </body>
 </html>
