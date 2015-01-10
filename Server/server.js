@@ -86,7 +86,7 @@ app.get('/shapes.js', function(request, response){
 io.on('connection', function(socket){
     console.log('Users connected: ' + io.sockets.sockets.length);
 
-    socket.emit('canvasChange', JSON.stringify(allClientShapes));
+    socket.emit('initCanvas', JSON.stringify(allClientShapes));
 
     socket.on('getNextShapeId', function(){
         console.log('Shape id: ' + nextShapeId);
