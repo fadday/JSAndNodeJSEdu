@@ -13,8 +13,23 @@ app.set('views', 'C:\\Users\\Администратор\\Documents\\JavaScript\\
 app.engine('html', require('ejs').renderFile);
 
 app.get('/', function(request, response){
+    console.log('get Index.html');
     response.render('index.html', {layout: true});
 });
+
+app.get('/phone', function(request, response){
+    console.log('Phone requested');
+    response.render('phone.html', {layout: true});
+});
+
+app.get('/phone_local', function(request, response){
+    console.log('Phone requested');
+    response.render('phone_local.html', {layout: true});
+});
+
+app.get('/app', function(request, response){
+    response.sendfile('Server/CordovaApp-debug.apk');
+})
 
 app.get('/ajax', function(request, response){
     response.send(shapeArrayJSON);
