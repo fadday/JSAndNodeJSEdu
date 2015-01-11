@@ -9,22 +9,12 @@ var nextShapeId = 1;
 var debug = false;
 
 app.set('view engine', 'ejs');
-app.set('views', 'C:\\Users\\Администратор\\Documents\\JavaScript\\NodeJS\\Education\\JSAndNodeJSEdu\\Shapes\\');
+app.set('views', 'Shapes/');
 app.engine('html', require('ejs').renderFile);
 
 app.get('/', function(request, response){
     console.log('get Index.html');
     response.render('index.html', {layout: true});
-});
-
-app.get('/phone', function(request, response){
-    console.log('Phone requested');
-    response.render('phone.html', {layout: true});
-});
-
-app.get('/phone_local', function(request, response){
-    console.log('Phone requested');
-    response.render('phone_local.html', {layout: true});
 });
 
 app.get('/app', function(request, response){
